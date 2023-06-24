@@ -3,6 +3,7 @@ import subprocess
 from urllib.parse import urlparse
 import tldextract
 import mediafire_dl
+import gdown
 import mimetypes
 import random
 import string
@@ -49,6 +50,15 @@ def call_script_for_host(host, url):
 
     if host == "mediafire.com":
         mediafire_dl.download(url, filename, quiet=False)
+    elif extract_host_simple(url) == "drive.google.com":
+        gdown.download(url, filename, quiet=False, fuzzy=True)
+    else:
+        print(f"Host not recognized")
+        return False
+
+    if not os.path.exists(filename):
+        print(f"File doesn't exist anymore")
+        return False
 
     if not bool(os.path.splitext(filename)[1]):
         print(f"Detected missing filename for {filename}")
@@ -65,13 +75,16 @@ def extract_host(url):
     domain = tldextract.extract(parsed_url.netloc)
     return domain.registered_domain
 
+def extract_host_simple(url):
+    parsed_url = urlparse(url)
+    return parsed_url.netloc
+
 def string_matches_file(string, file_path):
     if not os.path.exists(file_path):
         return False
 
     with open(file_path, 'r') as file:
         for line in file:
-            line = line.strip()  # Remove leading/trailing whitespace and newline characters
             if line == string:
                 return True
     return False
@@ -104,4 +117,6 @@ if __name__ == "__main__":
             host = extract_host(url)
             if call_script_for_host(host, url):
                 append_line_to_file(url, "downloaded.txt")
+        else:
+            print(f"Skip: {url}")
 
