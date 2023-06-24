@@ -8,6 +8,7 @@ import mimetypes
 import random
 import string
 import os
+import DriveDownloader.downloader
 
 def extract_directory(url):
     parsed_url = urlparse(url)
@@ -40,6 +41,8 @@ def generate_filename(url):
         filename = generate_random_list(10)
     if os.path.exists(directory_path + "/" + filename):
         filename = generate_random_list(10) + filename
+    if len(filename) > 150:
+        filename = filename[-150:]
     return directory_path + "/" + filename
 
 def call_script_for_host(host, url):
@@ -53,8 +56,12 @@ def call_script_for_host(host, url):
     elif extract_host_simple(url) == "drive.google.com":
         gdown.download(url, filename, quiet=False, fuzzy=True)
     else:
-        print(f"Host not recognized")
-        return False
+        try:
+            DriveDownloader.downloader.download_single_file(url, filename, thread_number=1)
+        except Exception as e:
+            print(f"An error occured: {str(e)}")
+            print(f"Host not recognized")
+            return False
 
     if not os.path.exists(filename):
         print(f"File doesn't exist anymore")

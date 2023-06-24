@@ -3,4 +3,11 @@
 ### Supports
 
 Mediafire
+
 Google Drive
+
+OneDrive
+
+Dropbox
+
+Direct Links
